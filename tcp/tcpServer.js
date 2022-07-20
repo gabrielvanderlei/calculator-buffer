@@ -3,7 +3,8 @@ const {
     HOST,
     serverLog,
     UnMarshaller ,
-    getRandomId
+    getRandomId,
+    Marshaller
 } = require('../lib/configuration');
 
 const {
@@ -28,9 +29,7 @@ try {
             } = processOperation(command, message);
 
             if (allInputsValid) {
-                socket.write(`[${String(command).toUpperCase()}]: ${finalResult}`);
-            } else {
-                socket.write(`[${String(command).toUpperCase()}]: Invalid parameters, please only send numbers`);
+                socket.write(Marshaller({ command, n1: finalResult }));
             }
         }
 

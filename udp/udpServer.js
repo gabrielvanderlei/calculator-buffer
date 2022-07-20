@@ -1,7 +1,9 @@
 const {
     PORT,
     HOST,
-    serverLog
+    serverLog,
+    Marshaller,
+    UnMarshaller
 } = require('../lib/configuration');
 
 const {
@@ -37,9 +39,7 @@ try {
             } = processOperation(command, message);
 
             if (allInputsValid) {
-                sendToPort(port, server, `[${String(command).toUpperCase()}]: ${finalResult}`);
-            } else {
-                sendToPort(port, server, `[${String(command).toUpperCase()}]: Invalid parameters, please only send numbers`);
+                sendToPort(port, server, Marshaller({ command, n1: finalResult }));
             }
         }
     }
@@ -54,7 +54,10 @@ try {
         let messageFromClient = msg.toString();
         serverLog('Data received from client : ' + messageFromClient);
         serverLog(`Received ${msg.length} bytes from ${info.address}:${info.port}`);
-        processCommand(messageFromClient, server, info.port);
+
+        const messageObject =  UnMarshaller(msg);
+        const messageFormat = `${messageObject.command} ${messageObject.n1} ${messageObject.n2}`;
+        processCommand(messageFormat, server, info.port);
     });
 
     server.on('error', function (error) {

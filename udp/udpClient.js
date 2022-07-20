@@ -1,8 +1,11 @@
 const {
     PORT,
     HOST,
-    clientLog
+    clientLog,
+    Marshaller,
+    UnMarshaller
 } = require('../lib/configuration');
+const { isOperation } = require('../lib/operations');
 
 try {
     let dgram = require('dgram');
@@ -29,8 +32,12 @@ try {
     rl.on('line', (message) => {
         let messageSplitted = message.split(' ');
 
+        let command = messageSplitted[0];
+        let n1 = messageSplitted[1];
+        let n2 = messageSplitted[2];
+
         if (messageSplitted.length > 1) {
-            client.send(message, PORT, HOST, function (error) {
+            client.send(Marshaller({ command, n1, n2 }), PORT, HOST, function (error) {
                 if (error) {
                     clientLog(error);
                     client.close();
@@ -39,12 +46,16 @@ try {
                 }
             });
         } else {
-            clientLog(`Message format: [command] content. Example: message hi`)
+            clientLog(`Message format: [command] content. Example: + 1 1`)
         }
     });
 
     client.on("message", function (data) {
-        clientLog(data);
+        let returnData = UnMarshaller(data);
+        
+        if(isOperation(returnData.command)){
+            console.log(`[CLIENT] [${returnData.command}]: ${returnData.n1}`);
+        }
     })
 
 } catch (e) {

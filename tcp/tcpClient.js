@@ -3,8 +3,10 @@ const {
     PORT,
     HOST,
     clientLog,
-    Marshaller 
+    Marshaller, 
+    UnMarshaller
 } = require('../lib/configuration');
+const { isOperation } = require('../lib/operations');
 
 try {
     const netLib = require('net');
@@ -71,7 +73,11 @@ try {
             startProcessing();
 
             client.on('data', function (chunk) {
-                console.log(`[SERVER] ${chunk.toString()}.`);
+                let returnData = UnMarshaller(chunk);
+                
+                if(isOperation(returnData.command)){
+                    console.log(`[SERVER] [${returnData.command}]: ${returnData.n1}`);
+                }
             });
         });
     });
